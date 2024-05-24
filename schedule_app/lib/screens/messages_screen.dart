@@ -30,7 +30,7 @@ class MessagesScreen extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        color: Color.fromARGB(38, 255, 255, 255)),
+                        color: Theme.of(context).shadowColor),
                     child: ListTile(
                       title: Text(message.text),
                       subtitle: Align(

@@ -105,7 +105,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             child: Container(
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
-                  color: Color.fromARGB(38, 255, 255, 255)),
+                  color: Theme.of(context).shadowColor),
               child: Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: Row(
@@ -132,7 +132,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             child: Container(
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
-                  color: Color.fromARGB(38, 255, 255, 255)),
+                  color: Theme.of(context).shadowColor),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
@@ -170,7 +170,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        color: Color.fromARGB(38, 255, 255, 255)),
+                        color: Theme.of(context).shadowColor),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Row(

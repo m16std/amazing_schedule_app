@@ -37,6 +37,9 @@ class _MyAppState extends State<MyApp> {
               title: 'University Schedule',
               theme: ThemeData(
                 primaryColor: const Color.fromARGB(255, 230, 148, 78),
+                shadowColor: state.brightness == Brightness.dark
+                    ? Color.fromARGB(19, 255, 255, 255)
+                    : Color.fromARGB(19, 32, 32, 32),
                 colorScheme: ColorScheme.fromSeed(
                   seedColor: Colors.blueAccent,
                   // ···
