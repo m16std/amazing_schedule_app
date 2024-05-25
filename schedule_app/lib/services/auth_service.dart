@@ -4,40 +4,36 @@ import 'package:crypto/crypto.dart';
 import 'dart:convert';
 
 class AuthService extends ChangeNotifier {
-  bool isConnected = false;
-
-  late PostgreSQLConnection _connection;
-
   AuthService() {
-    _connectToDatabase();
+    createConnection();
   }
 
-  Future<void> _connectToDatabase() async {
-    _connection = PostgreSQLConnection(
+  PostgreSQLConnection createConnection() {
+    return PostgreSQLConnection(
       'localhost',
       5432,
       'schedule_db',
       username: 'postgres',
       password: "'",
     );
-    await _connection.open();
-    isConnected = true;
   }
 
   int? _currentUserId;
   int? get currentUserId => _currentUserId;
 
   Future<bool> login(String username, String password) async {
-    if (!isConnected) {
-      await _connectToDatabase();
-    }
+    final connection = createConnection();
+    await connection.open();
+
     final passwordHash = md5.convert(utf8.encode(password)).toString();
-    List<List<dynamic>> results = await _connection.query('''
+    List<List<dynamic>> results = await connection.query('''
       SELECT cnt_id FROM client WHERE cnt_login = @username AND cnt_pass = @passwordHash
     ''', substitutionValues: {
       'username': username,
       'passwordHash': passwordHash,
     });
+
+    await connection.close();
 
     if (results.isNotEmpty) {
       _currentUserId = results[0][0];
@@ -49,11 +45,16 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<bool> isAdmin() async {
-    List<List<dynamic>> results = await _connection.query('''
+    final connection = createConnection();
+    await connection.open();
+
+    List<List<dynamic>> results = await connection.query('''
       SELECT cnt_type FROM client WHERE cnt_id = @currentUserId
     ''', substitutionValues: {
       'currentUserId': _currentUserId,
     });
+
+    await connection.close();
 
     if (results.isNotEmpty) {
       return results[0][0] == 1;

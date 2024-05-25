@@ -1,19 +1,11 @@
 import 'package:postgres/postgres.dart';
+import 'package:schedule_app/services/auth_service.dart';
 import '../models/class_model.dart';
 
 class ClassService {
-  PostgreSQLConnection _createConnection() {
-    return PostgreSQLConnection(
-      'localhost',
-      5432,
-      'schedule_db',
-      username: 'postgres',
-      password: "'",
-    );
-  }
-
   Future<List<Class>> fetchClasses(int semesterId, int currentWeek) async {
-    final connection = _createConnection();
+    final authService = AuthService();
+    PostgreSQLConnection connection = authService.createConnection();
     await connection.open();
 
     List<List<dynamic>> results = await connection.query('''
