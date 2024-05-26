@@ -112,7 +112,20 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-          title: Text('Домашняя страница'), automaticallyImplyLeading: false),
+          title: Text('Домашняя страница'),
+          automaticallyImplyLeading: false,
+          actions: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: IconButton(
+                icon: const Icon(Icons.open_in_new),
+                tooltip: 'Поделиться',
+                onPressed: () {
+                  Navigator.pushReplacementNamed(context, '/login');
+                },
+              ),
+            ),
+          ]),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : Padding(
@@ -240,15 +253,17 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       currentIndex: 0,
       selectedItemColor: Theme.of(context).primaryColor,
       onTap: (index) {
-        if (index == 0) {
-          //Navigator.pushReplacementNamed(context, '/user');
-        } else if (index == 1) {
+        if (index == 1) {
+          context
+              .read<SelectCubit>()
+              .setSelect(selectedSemester ?? -1, selectedGroup ?? -1);
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => ScheduleScreen(
                 selectedGroup: selectedGroup ?? -1,
                 selectedSemester: selectedSemester ?? -1,
+                currentWeek: 0,
               ),
             ),
           );
@@ -258,144 +273,4 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       },
     );
   }
-/*
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, '/login');
-            },
-          ),
-        ],
-      ),
-      body: _isLoadingGroups
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                groupAndSemesterSelectors(),
-              ],
-            ),
-      bottomNavigationBar: bottomBar(context),
-    );
-  }
-
-
-
-  Widget groupAndSemesterSelectors() {
-    final brightness = context.watch<ThemeCubit>().state.brightness;
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Container(
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Theme.of(context).shadowColor),
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  children: [
-                    const Text('Темная тема'),
-                    Expanded(
-                      child: Container(),
-                    ),
-                    Switch(
-                      value: brightness == Brightness.dark,
-                      activeColor: Theme.of(context).primaryColor,
-                      onChanged: (bool value) {
-                        context.read<ThemeCubit>().setThemeBrightness(
-                            value ? Brightness.dark : Brightness.light);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Container(
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Theme.of(context).shadowColor),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    const Text('Група'),
-                    Expanded(
-                      child: Container(),
-                    ),
-                    DropdownButton<int>(
-                      value: _selectedGroup == -1 ? null : _selectedGroup,
-                      items: _groups.map((group) {
-                        return DropdownMenuItem<int>(
-                          value: group['grp_id'],
-                          child: Text(group['grp_name']),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedGroup = value!;
-                          _isLoadingSemesters = true;
-                          _loadSemesters(_selectedGroup);
-                        });
-                      },
-                      hint: const Text('Выберите группу'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          _isLoadingSemesters
-              ? const CircularProgressIndicator()
-              : Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Theme.of(context).shadowColor),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          const Text('Семестр'),
-                          Expanded(
-                            child: Container(),
-                          ),
-                          DropdownButton<int>(
-                            value: _selectedSemester == -1
-                                ? null
-                                : _selectedSemester,
-                            items: _semesters.map((semester) {
-                              return DropdownMenuItem<int>(
-                                value: semester,
-                                child: Text('Семестр $semester'),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedSemester = value!;
-                              });
-                            },
-                            hint: const Text('Выберите семестр'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-        ],
-      ),
-    );
-  }
-  */
 }

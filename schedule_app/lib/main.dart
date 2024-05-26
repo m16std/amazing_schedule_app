@@ -56,10 +56,12 @@ class _MyAppState extends State<MyApp> {
                 '/': (context) => LoginScreen(),
                 '/login': (context) => LoginScreen(),
                 '/user': (context) => UserHomeScreen(),
+                '/admin_home': (context) => AdminHomeScreen(),
                 '/admin': (context) => AdminHomeScreen(),
                 '/schedule': (context) => ScheduleScreen(
                       selectedGroup: 0,
                       selectedSemester: 0,
+                      currentWeek: 0,
                     ),
                 '/messages': (context) => MessagesScreen(),
               },

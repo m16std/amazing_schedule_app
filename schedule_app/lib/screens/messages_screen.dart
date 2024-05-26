@@ -78,11 +78,10 @@ class MessagesScreen extends StatelessWidget {
                 selectedGroup: context.watch<SelectCubit>().state.selectedGroup,
                 selectedSemester:
                     context.watch<SelectCubit>().state.selectedSemester,
+                currentWeek: 0,
               ),
             ),
           );
-        } else if (index == 2) {
-          //Navigator.pushReplacementNamed(context, '/messages');
         }
       },
     );

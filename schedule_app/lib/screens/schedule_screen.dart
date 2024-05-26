@@ -1,34 +1,39 @@
+import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_image_saver/flutter_image_saver.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:postgres/postgres.dart';
+import 'package:screenshot/screenshot.dart';
 import '../bloc/select/select_cubit.dart';
-import '../models/class_model.dart';
+
 import '../services/auth_service.dart';
-import '../services/class_service.dart';
+
+import 'package:share/share.dart';
 
 class ScheduleScreen extends StatefulWidget {
   final int selectedGroup;
   final int selectedSemester;
+  final int currentWeek;
 
-  ScheduleScreen({required this.selectedGroup, required this.selectedSemester});
+  ScheduleScreen({
+    required this.selectedGroup,
+    required this.selectedSemester,
+    required this.currentWeek,
+  });
 
   @override
   _ScheduleScreenState createState() => _ScheduleScreenState();
 }
 
 class _ScheduleScreenState extends State<ScheduleScreen> {
-  int _currentWeek = 0;
-  late Future<List<Class>> _classesFuture;
-
-  Future<List<Class>> _fetchClasses() async {
-    final service = ClassService();
-    return service.fetchClasses(widget.selectedSemester, _currentWeek);
-  }
-
   List<List<Map<String, dynamic>>> whiteWeekSchedule = [];
   List<List<Map<String, dynamic>>> greenWeekSchedule = [];
   bool isLoading = true;
-  int currentWeek = 1;
 
   @override
   void initState() {
@@ -67,12 +72,12 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
       if (row[7] == 3 ||
           (row[7] == 1) ||
-          (row[7] == 0 && row[8] == currentWeek - 1)) {
+          (row[7] == 0 && row[8] == widget.currentWeek - 1)) {
         fetchedWhiteWeekSchedule[row[6]].add(classInfo);
       }
       if (row[7] == 3 ||
           (row[7] == 2) ||
-          (row[7] == 0 && row[8] == currentWeek)) {
+          (row[7] == 0 && row[8] == widget.currentWeek)) {
         fetchedGreenWeekSchedule[row[6]].add(classInfo);
       }
     }
@@ -86,55 +91,86 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     await connection.close();
   }
 
+  Uint8List? _imageFile;
+  ScreenshotController screenshotController = ScreenshotController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          AppBar(title: Text('Расписание'), automaticallyImplyLeading: false),
+      appBar: topBar(),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    _buildControls(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text('Белая неделя',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold)),
-                              _buildWeekColumn(whiteWeekSchedule),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text('Зеленая неделя',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold)),
-                              _buildWeekColumn(greenWeekSchedule),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          : scheduleWidget(),
       bottomNavigationBar: bottomBar(context),
     );
+  }
+
+  SingleChildScrollView scheduleWidget() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Screenshot(
+          controller: screenshotController,
+          child: Column(
+            children: [
+              _buildControls(),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Text('Белая неделя',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
+                        _buildWeekColumn(whiteWeekSchedule),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Text('Зеленая неделя',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
+                        _buildWeekColumn(greenWeekSchedule),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  AppBar topBar() {
+    return AppBar(
+        title: Text('Расписание'),
+        automaticallyImplyLeading: false,
+        actions: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: IconButton(
+              icon: const Icon(Icons.open_in_new),
+              tooltip: 'Поделиться',
+              onPressed: () {
+                screenshotController
+                    .capture(delay: Duration(milliseconds: 10))
+                    .then((capturedImage) async {
+                  await saveImage(capturedImage!, 'image.png');
+                }).catchError((onError) {
+                  print(onError);
+                });
+              },
+            ),
+          ),
+        ]);
   }
 
   Widget _buildControls() {
@@ -146,19 +182,37 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
-              setState(() {
-                _currentWeek = (_currentWeek - 2).clamp(0, 14);
-              });
+              Navigator.pop(context); // pop current page
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ScheduleScreen(
+                      selectedGroup:
+                          context.watch<SelectCubit>().state.selectedGroup,
+                      selectedSemester:
+                          context.watch<SelectCubit>().state.selectedSemester,
+                      currentWeek: (widget.currentWeek - 2).clamp(0, 14)),
+                ),
+              );
             },
           ),
-          Text('Недели ${_currentWeek + 1} - ${_currentWeek + 2}',
+          Text('Недели ${widget.currentWeek + 1} - ${widget.currentWeek + 2}',
               style: TextStyle(fontSize: 16)),
           IconButton(
             icon: Icon(Icons.arrow_forward),
             onPressed: () {
-              setState(() {
-                _currentWeek = (_currentWeek + 2).clamp(0, 14);
-              });
+              Navigator.pop(context); // pop current page
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ScheduleScreen(
+                      selectedGroup:
+                          context.watch<SelectCubit>().state.selectedGroup,
+                      selectedSemester:
+                          context.watch<SelectCubit>().state.selectedSemester,
+                      currentWeek: (widget.currentWeek + 2).clamp(0, 14)),
+                ),
+              );
             },
           ),
         ],
@@ -179,8 +233,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       onTap: (index) {
         if (index == 0) {
           Navigator.pushReplacementNamed(context, '/user');
-        } else if (index == 1) {
-          //Navigator.pushReplacementNamed(context, '/schedule');
         } else if (index == 2) {
           Navigator.pushReplacementNamed(context, '/messages');
         }
@@ -281,134 +333,3 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     }
   }
 }
-
-
-
-
-/*
-
-
-
-
-
-
-      bottomNavigationBar: bottomBar(context),
-
-  BottomNavigationBar bottomBar(BuildContext context) {
-    return BottomNavigationBar(
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Дом'),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.schedule), label: 'Расписание'),
-        BottomNavigationBarItem(icon: Icon(Icons.message), label: 'Сообщения'),
-      ],
-      currentIndex: 1,
-      selectedItemColor: Theme.of(context).primaryColor,
-      onTap: (index) {
-        if (index == 0) {
-          Navigator.pushReplacementNamed(context, '/user');
-        } else if (index == 1) {
-          //Navigator.pushReplacementNamed(context, '/schedule');
-        } else if (index == 2) {
-          Navigator.pushReplacementNamed(context, '/messages');
-        }
-      },
-    );
-  }
-
-
-
-
-
-class ScheduleScreen extends StatelessWidget {
-  Future<List<Map<String, dynamic>>> _fetchSchedule() async {
-    final db = await DBService().database;
-    return await db.query('schedule');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Schedule')),
-      body: FutureBuilder(
-        future: _fetchSchedule(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            final schedule = snapshot.data as List<Map<String, dynamic>>;
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(// a dirty trick to make the DataTable fit width
-                  children: <Widget>[
-                Expanded(
-                    child: SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        child: DataTable(
-                          columns: const [
-                            DataColumn(
-                              label: Expanded(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: const [Text("Белая неделя")],
-                                ),
-                              ),
-                            ),
-                            DataColumn(
-                              label: Expanded(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: const [Text("Зеленая неделя")],
-                                ),
-                              ),
-                            ),
-                          ],
-                          rows: List<DataRow>.generate(
-                            6,
-                            (index) {
-                              return DataRow(cells: [
-                                DataCell(Text(schedule
-                                    .where((s) =>
-                                        s['weekType'] == 0 && s['day'] == index)
-                                    .map((s) => s['subject'])
-                                    .join('\n'))),
-                                DataCell(Text(schedule
-                                    .where((s) =>
-                                        s['weekType'] == 1 && s['day'] == index)
-                                    .map((s) => s['subject'])
-                                    .join('\n'))),
-                              ]);
-                            },
-                          ),
-                        )))
-              ]),
-            );
-          }
-        },
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Дом'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.schedule), label: 'Расписание'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.message), label: 'Сообщения'),
-        ],
-        currentIndex: 1,
-        selectedItemColor: Theme.of(context).primaryColor,
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacementNamed(context, '/user');
-          } else if (index == 1) {
-            //Navigator.pushReplacementNamed(context, '/schedule');
-          } else if (index == 2) {
-            Navigator.pushReplacementNamed(context, '/messages');
-          }
-        },
-      ),
-    );
-  }
-}
-*/

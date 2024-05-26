@@ -3,12 +3,10 @@ description: "A new Flutter project."
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-
 version: 1.0.0+1
 
 environment:
   sdk: '>=3.2.3 <4.0.0'
-
 
 dependencies:
   flutter:
@@ -24,17 +22,15 @@ dependencies:
   flutter_bloc: ^8.1.5
   postgres: ^2.6.4
   intl: ^0.19.0
-
+  screenshot: ^3.0.0
+  share: ^2.0.4
+  flutter_image_saver : ^1.0.1
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-
   flutter_lints: ^2.0.0
 
-
 flutter:
-
-
   uses-material-design: true
 
