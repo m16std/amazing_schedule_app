@@ -118,8 +118,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: IconButton(
-                icon: const Icon(Icons.open_in_new),
-                tooltip: 'Поделиться',
+                icon: const Icon(Icons.logout),
                 onPressed: () {
                   Navigator.pushReplacementNamed(context, '/login');
                 },

@@ -18,48 +18,37 @@ class AuthService extends ChangeNotifier {
     );
   }
 
-  int? _currentUserId;
-  int? get currentUserId => _currentUserId;
+  int? currentUserId;
+  bool? isAdmin;
 
   Future<bool> login(String username, String password) async {
     final connection = createConnection();
     await connection.open();
 
     final passwordHash = md5.convert(utf8.encode(password)).toString();
-    List<List<dynamic>> results = await connection.query('''
-      SELECT cnt_id FROM client WHERE cnt_login = @username AND cnt_pass = @passwordHash
+
+    var result = await connection.query('''
+      SELECT cnt_id, cnt_type FROM client WHERE cnt_login = @username AND cnt_pass = @password
     ''', substitutionValues: {
       'username': username,
-      'passwordHash': passwordHash,
+      'password': passwordHash,
     });
 
-    await connection.close();
-
-    if (results.isNotEmpty) {
-      _currentUserId = results[0][0];
-
+    if (result.isNotEmpty) {
+      currentUserId = result.first[0];
+      isAdmin = result.first[1] == 1;
+      notifyListeners();
+      await connection.close();
       return true;
+    } else {
+      await connection.close();
+      return false;
     }
-
-    return false;
   }
 
-  Future<bool> isAdmin() async {
-    final connection = createConnection();
-    await connection.open();
-
-    List<List<dynamic>> results = await connection.query('''
-      SELECT cnt_type FROM client WHERE cnt_id = @currentUserId
-    ''', substitutionValues: {
-      'currentUserId': _currentUserId,
-    });
-
-    await connection.close();
-
-    if (results.isNotEmpty) {
-      return results[0][0] == 1;
-    }
-
-    return false;
+  Future<void> logout() async {
+    currentUserId = null;
+    isAdmin = false;
+    notifyListeners();
   }
 }

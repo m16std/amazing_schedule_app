@@ -15,25 +15,43 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
   int _groupDuration = 4;
 
   Future<void> _addGroup() async {
-    final authService = AuthService();
-    PostgreSQLConnection connection = authService.createConnection();
-    await connection.open();
-    await connection.query('''
+    try {
+      final authService = AuthService();
+      PostgreSQLConnection connection = authService.createConnection();
+      await connection.open();
+
+      // Проверка существования группы с таким названием
+      var groupCheck = await connection.query('''
+        SELECT grp_id FROM groups WHERE grp_name = @groupName
+      ''', substitutionValues: {
+        'groupName': _groupName,
+      });
+      if (groupCheck.isNotEmpty) {
+        await connection.close();
+        throw Exception('Группа с таким названием уже существует.');
+      }
+
+      await connection.query('''
       INSERT INTO groups (grp_name, grp_year, grp_duration)
       VALUES (@groupName, @groupYear, @groupDuration)
     ''', substitutionValues: {
-      'groupName': _groupName,
-      'groupYear': _groupYear,
-      'groupDuration': _groupDuration,
-    });
-    await connection.close();
-    Navigator.pop(context);
+        'groupName': _groupName,
+        'groupYear': _groupYear,
+        'groupDuration': _groupDuration,
+      });
+      await connection.close();
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Группа добавлена')));
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Не удалось добавить. $e')));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Add Group')),
+      appBar: AppBar(title: Text('Добавить группу')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -41,21 +59,21 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
           child: Column(
             children: [
               TextFormField(
-                decoration: InputDecoration(labelText: 'Group Name'),
+                decoration: InputDecoration(labelText: 'Название'),
                 onChanged: (value) => _groupName = value,
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Group Year'),
+                decoration: InputDecoration(labelText: 'Год'),
                 onChanged: (value) => _groupYear = int.tryParse(value) ?? 2021,
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Group Duration'),
+                decoration: InputDecoration(labelText: 'Срок обучения'),
                 onChanged: (value) => _groupDuration = int.tryParse(value) ?? 4,
               ),
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _addGroup,
-                child: Text('Add Group'),
+                child: Text('Добавить'),
               ),
             ],
           ),

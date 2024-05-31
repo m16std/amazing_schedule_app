@@ -35,25 +35,25 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.person_add),
-            label: 'Add User',
+            label: 'Пользователи',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.class_),
-            label: 'Add Class',
+            label: 'Пары',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.message),
-            label: 'Add Message',
+            label: 'Сообщения',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.group_add),
-            label: 'Add Group',
+            label: 'Группы',
           ),
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         selectedItemColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Colors.black38,
+        unselectedItemColor: Theme.of(context).disabledColor,
         showUnselectedLabels: true,
       ),
     );

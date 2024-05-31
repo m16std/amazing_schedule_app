@@ -9,9 +9,14 @@ import 'screens/admin_home_screen.dart';
 import 'screens/schedule_screen.dart';
 import 'screens/messages_screen.dart';
 import 'services/auth_service.dart';
+import 'package:desktop_window/desktop_window.dart' as window_size;
+import 'dart:io';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    window_size.DesktopWindow.setWindowSize(const Size(480, 950));
+  }
   runApp(
     ChangeNotifierProvider(
       create: (context) => AuthService(),
@@ -43,6 +48,12 @@ class _MyAppState extends State<MyApp> {
                 shadowColor: state.brightness == Brightness.dark
                     ? const Color.fromARGB(19, 255, 255, 255)
                     : const Color.fromARGB(19, 32, 32, 32),
+                disabledColor: state.brightness == Brightness.light
+                    ? const Color.fromARGB(80, 0, 0, 0)
+                    : const Color.fromARGB(129, 255, 255, 255),
+                canvasColor: state.brightness == Brightness.light
+                    ? const Color.fromARGB(255, 249, 249, 255)
+                    : const Color.fromARGB(255, 17, 19, 24),
                 colorScheme: ColorScheme.fromSeed(
                   seedColor: Colors.blueAccent,
                   // ···

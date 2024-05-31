@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = false;
     });
 
-    bool isAdmin = await context.read<AuthService>().isAdmin();
+    bool isAdmin = context.read<AuthService>().isAdmin!;
 
     if (success) {
       if (isAdmin) {
@@ -46,9 +46,8 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } else {
-      setState(() {
-        _errorMessage = 'Не удалось войти';
-      });
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Не удалось войти')));
     }
   }
 
