@@ -76,13 +76,16 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       };
 
       if (specials.last[1] == row[5] && specials.last[2] == row[6]) {
+        //если специальная пара заменила текущую пару
         if (specials.last[4] % 2 == 1) {
+          //и специальная пара была на белой неделе
           if (row[7] == 3 ||
               (row[7] == 2) ||
               (row[7] == 0 && row[8] == widget.currentWeek + 2)) {
             fetchedGreenWeekSchedule[row[6]].add(classInfo);
           }
         } else {
+          //и специальная пара была на зеленой неделе
           if (row[7] == 3 ||
               (row[7] == 1) ||
               (row[7] == 0 && row[8] == widget.currentWeek + 1)) {
@@ -118,7 +121,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     await connection.close();
   }
 
-  Uint8List? _imageFile;
   ScreenshotController screenshotController = ScreenshotController();
 
   @override
@@ -193,9 +195,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                       color: classInfo['type'] == 4
                           ? const Color.fromARGB(58, 160, 148, 39)
                           : classInfo['type'] == 5
-                              ? Color.fromARGB(57, 150, 59, 255)
+                              ? const Color.fromARGB(57, 150, 59, 255)
                               : classInfo['type'] == 6
-                                  ? Color.fromARGB(57, 255, 59, 59)
+                                  ? const Color.fromARGB(57, 255, 59, 59)
                                   : type == 0
                                       ? Theme.of(context).shadowColor
                                       : const Color.fromARGB(59, 59, 160, 39)),

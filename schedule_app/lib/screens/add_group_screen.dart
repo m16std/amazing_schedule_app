@@ -41,7 +41,7 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
       });
       await connection.close();
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Группа добавлена')));
+          .showSnackBar(const SnackBar(content: Text('Группа добавлена')));
     } catch (e) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Не удалось добавить. $e')));
@@ -51,7 +51,7 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Добавить группу')),
+      appBar: AppBar(title: const Text('Добавить группу')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -59,21 +59,21 @@ class _AddGroupScreenState extends State<AddGroupScreen> {
           child: Column(
             children: [
               TextFormField(
-                decoration: InputDecoration(labelText: 'Название'),
+                decoration: const InputDecoration(labelText: 'Название'),
                 onChanged: (value) => _groupName = value,
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Год'),
+                decoration: const InputDecoration(labelText: 'Год'),
                 onChanged: (value) => _groupYear = int.tryParse(value) ?? 2021,
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Срок обучения'),
+                decoration: const InputDecoration(labelText: 'Срок обучения'),
                 onChanged: (value) => _groupDuration = int.tryParse(value) ?? 4,
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _addGroup,
-                child: Text('Добавить'),
+                child: const Text('Добавить'),
               ),
             ],
           ),

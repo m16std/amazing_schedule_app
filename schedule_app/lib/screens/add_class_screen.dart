@@ -102,20 +102,11 @@ class _AddClassScreenState extends State<AddClassScreen> {
       PostgreSQLConnection connection = authService.createConnection();
       await connection.open();
 
-      // Вызов хранимой процедуры для получения smt_id
-      var result = await connection.query('''
-      SELECT get_smt_id(@groupName, @semesterNumber)
-    ''', substitutionValues: {
-        'groupName': _groupName,
-        'semesterNumber': _semesterNumber,
-      });
-
-      int smtId = result.first[0];
       await connection.query('''
         INSERT INTO class (smt_id, cls_subject, cls_teacher, cls_room, cls_type, cls_num, cls_day, cls_week, cls_periodicity)
         VALUES (@smtId, @subject, @teacher, @room, @classType, @classNum, @day, @week, @periodicity)
       ''', substitutionValues: {
-        'smtId': smtId,
+        'smtId': _semesterNumber,
         'subject': _subject,
         'teacher': _teacher,
         'room': _room,
@@ -152,8 +143,11 @@ class _AddClassScreenState extends State<AddClassScreen> {
             'class_periodicity': _periodicity,
           });
     } catch (e) {
-      print('Не удалось удалить. $e');
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Не удалось добавить. $e')));
     } finally {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Добавлено')));
       await connection.close();
     }
   }
@@ -194,7 +188,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
                   },
                 ),
               ]),
-              Divider(),
+              const Divider(),
               Row(children: [
                 const Text('Семестр'),
                 Expanded(
@@ -213,7 +207,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
                   },
                 ),
               ]),
-              Divider(),
+              const Divider(),
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Предмет'),
                 onChanged: (value) => _subject = value,
@@ -293,7 +287,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
                         onPressed: _addClass,
                         child: const Text('Добавить'),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 10,
                       ),
                       ElevatedButton(

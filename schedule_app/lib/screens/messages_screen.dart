@@ -10,8 +10,8 @@ class MessagesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          AppBar(title: Text('Сообщения'), automaticallyImplyLeading: false),
+      appBar: AppBar(
+          title: const Text('Сообщения'), automaticallyImplyLeading: false),
       body: messageList(),
       bottomNavigationBar: bottomBar(context),
     );
@@ -22,11 +22,11 @@ class MessagesScreen extends StatelessWidget {
       future: MessageService().fetchMessages(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text('Нет доступных сообщений'));
+          return const Center(child: Text('Нет доступных сообщений'));
         } else {
           final messages = snapshot.data!;
           return ListView.builder(
