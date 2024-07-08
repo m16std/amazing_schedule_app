@@ -142,13 +142,12 @@ class _AddClassScreenState extends State<AddClassScreen> {
             'classWeek': _week,
             'class_periodicity': _periodicity,
           });
+      await connection.close();
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Пара удалена')));
     } catch (e) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Не удалось добавить. $e')));
-    } finally {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Добавлено')));
-      await connection.close();
+          .showSnackBar(SnackBar(content: Text('Не удалось удалить. $e')));
     }
   }
 
@@ -291,7 +290,7 @@ class _AddClassScreenState extends State<AddClassScreen> {
                         width: 10,
                       ),
                       ElevatedButton(
-                        onPressed: _addClass,
+                        onPressed: deleteClass,
                         child: const Text('Удалить'),
                       ),
                       Expanded(child: (Container()))

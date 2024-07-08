@@ -242,8 +242,11 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     .capture(delay: const Duration(milliseconds: 10))
                     .then((capturedImage) async {
                   await saveImage(capturedImage!, 'image.png');
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(const SnackBar(content: Text('Сохранено')));
                 }).catchError((onError) {
-                  print(onError);
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text('Не удалось сохранить. $onError')));
                 });
               },
             ),
